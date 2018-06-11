@@ -5,8 +5,12 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 	"sync"
+
+	"github.com/shawling/trace"
+	"github.com/stretchr/objx"
 
 	"github.com/stretchr/gomniauth"
 	"github.com/stretchr/gomniauth/providers/facebook"
@@ -26,7 +30,13 @@ func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	t.once.Do(func() {
 		t.templ1 = template.Must(template.ParseFiles(filepath.Join("template", t.filename)))
 	})
-	t.templ1.Execute(w, r)
+	data := map[string]interface{}{
+		"Host": r.Host,
+	}
+	if authCookie, err := r.Cookie("auth"); err == nil {
+		data["UserData"] = objx.MustFromBase64(authCookie.Value)
+	}
+	t.templ1.Execute(w, data)
 }
 
 func main() {
@@ -51,7 +61,7 @@ func main() {
 
 	//creat new room bingding on a websocket address
 	r := newRoom()
-	// r.tracer = trace.New(os.Stdout)
+	r.tracer = trace.New(os.Stdout)
 	http.Handle("/room", r)
 	go r.run()
 

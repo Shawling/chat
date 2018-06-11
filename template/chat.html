@@ -16,12 +16,17 @@
 <body>
     <ul id="messages"></ul>
     <form id="chatbox">
+        {{.UserData.name}}:
+        <br/>
         <textarea></textarea>
         <input type="submit" value="Send" />
     </form>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js">
     </script>
     <script>
+        function getLocalTime(nS) {
+            return new Date(parseInt(nS)).toLocaleString().replace(/:\d{1,2}$/, ' ');
+        }
         $(function () {
             var socket = null;
             var msgBox = $("#chatbox textarea");
@@ -32,7 +37,7 @@
                     alert("Error: There is no socket connection.");
                     return false;
                 }
-                socket.send(msgBox.val());
+                socket.send(JSON.stringify({ "Message": msgBox.val(), "When": (new Date()).valueOf() }));
                 msgBox.val("");
                 return false;
             });
@@ -44,7 +49,13 @@
                     alert("Connection has been closed.");
                 }
                 socket.onmessage = function (e) {
-                    messages.append($("<li>").text(e.data));
+                    var msg = JSON.parse(e.data);
+                    messages.append(
+                        $("<li>").append(
+                            $("<strong>").text(msg.Name + ": "),
+                            $("<span>").text(msg.Message + "    "),
+                            $("<span>").text(getLocalTime(msg.When))
+                        ));
                 }
             }
         });

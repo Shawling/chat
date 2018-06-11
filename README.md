@@ -1,1 +1,1 @@
-# goblueprints
+# A Chat server written with Go.

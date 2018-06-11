@@ -76,6 +76,7 @@ func loginHanlder(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, fmt.Sprintf("Error while trying to GetUser for %s: %s", provider.Name(), err), http.StatusInternalServerError)
 			return
 		}
+		//将用户名存储在一个 msi(map[string]interface()) 对象中，可以看做一个 JSON object。同时进行 base64 编码，方便传入 URL 或者存放在 cookie 中
 		authCookieValue := objx.New(map[string]interface{}{
 			"name": user.Name(),
 		}).MustBase64()
