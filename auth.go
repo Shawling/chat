@@ -16,8 +16,8 @@ type authHandler struct {
 }
 
 func (h *authHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	_, err := r.Cookie("auth")
-	if err == http.ErrNoCookie {
+	cookie, err := r.Cookie("auth")
+	if err == http.ErrNoCookie || cookie.Value == "" {
 		w.Header().Set("Location", "/login")
 		//Writeheader用于写入一个 http status code，由于默认的是200，所以这个方法常用于返回错误 code
 		w.WriteHeader(http.StatusTemporaryRedirect)
@@ -78,7 +78,8 @@ func loginHanlder(w http.ResponseWriter, r *http.Request) {
 		}
 		//将用户名存储在一个 msi(map[string]interface()) 对象中，可以看做一个 JSON object。同时进行 base64 编码，方便传入 URL 或者存放在 cookie 中
 		authCookieValue := objx.New(map[string]interface{}{
-			"name": user.Name(),
+			"name":       user.Name(),
+			"avatar_url": user.AvatarURL(),
 		}).MustBase64()
 		http.SetCookie(w, &http.Cookie{
 			Name:  "auth",
@@ -91,4 +92,15 @@ func loginHanlder(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		fmt.Fprintf(w, "Auth action %s not supperted yet", action)
 	}
+}
+
+func logoutHandler(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{
+		Name:   "auth",
+		Value:  "",
+		Path:   "/",
+		MaxAge: -1,
+	})
+	w.Header().Set("Location", "/chat")
+	w.WriteHeader(http.StatusTemporaryRedirect)
 }

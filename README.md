@@ -1,1 +1,1 @@
-# A Chat server written with Go.
+# A chat server write with Go.

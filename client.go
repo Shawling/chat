@@ -20,10 +20,15 @@ func (c *client) read() {
 	for {
 		msg := &message{}
 		err := c.socket.ReadJSON(&msg)
-		msg.Name = c.userData["name"].(string)
 		if err != nil {
 			log.Printf("Error reading from room %s: %s", c.userData["name"].(string), err)
 			return
+		}
+		msg.Name = c.userData["name"].(string)
+		if avatarURL, ok := c.userData["avatar_url"]; ok {
+			msg.AvatarURL = avatarURL.(string)
+		} else {
+			msg.AvatarURL = "http://img.hb.aicdn.com/99eab0f202688dbe7dedd09dfc69cace1201cf851f206-tlBb0W_fw658"
 		}
 		c.room.forward <- msg
 	}
