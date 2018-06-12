@@ -25,9 +25,7 @@ func (c *client) read() {
 			return
 		}
 		msg.Name = c.userData["name"].(string)
-		if avatarURL, ok := c.userData["avatar_url"]; ok {
-			msg.AvatarURL = avatarURL.(string)
-		} else {
+		if msg.AvatarURL, err = c.room.avatar.GetAvatarURL(c); err != nil {
 			msg.AvatarURL = "http://img.hb.aicdn.com/99eab0f202688dbe7dedd09dfc69cace1201cf851f206-tlBb0W_fw658"
 		}
 		c.room.forward <- msg

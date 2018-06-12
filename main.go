@@ -62,7 +62,7 @@ func main() {
 	http.HandleFunc("/logout", logoutHandler)
 
 	//creat new room bingding on a websocket address
-	r := newRoom()
+	r := newRoom(UseGravatar)
 	r.tracer = trace.New(os.Stdout)
 	http.Handle("/room", r)
 	go r.run()

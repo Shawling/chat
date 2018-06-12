@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 
@@ -66,7 +67,9 @@ func loginHanlder(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		//在CompleteAuth里，可能遇到翻墙问题， Mac可以使用ShadowSocks + Proxifier 的方法解决
+		log.Println("Completing Auth")
 		creds, err := provider.CompleteAuth(objx.MustFromURLQuery(r.URL.RawQuery))
+		log.Println("Completed Auth")
 		if err != nil {
 			http.Error(w, fmt.Sprintf("Error while trying to CompleteAuth for %s: %s", provider.Name(), err), http.StatusInternalServerError)
 			return
@@ -80,6 +83,7 @@ func loginHanlder(w http.ResponseWriter, r *http.Request) {
 		authCookieValue := objx.New(map[string]interface{}{
 			"name":       user.Name(),
 			"avatar_url": user.AvatarURL(),
+			"email":      user.Email(),
 		}).MustBase64()
 		http.SetCookie(w, &http.Cookie{
 			Name:  "auth",

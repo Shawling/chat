@@ -4,10 +4,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/stretchr/objx"
-
 	"github.com/gorilla/websocket"
 	"github.com/shawling/trace"
+	"github.com/stretchr/objx"
 )
 
 type room struct {
@@ -16,6 +15,7 @@ type room struct {
 	leave   chan *client
 	clients map[*client]bool
 	tracer  trace.Tracer
+	avatar  Avatar
 }
 
 const (
@@ -72,12 +72,13 @@ func (r *room) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	c.read()
 }
 
-func newRoom() *room {
+func newRoom(avatar Avatar) *room {
 	return &room{
 		forward: make(chan *message),
 		join:    make(chan *client),
 		leave:   make(chan *client),
 		clients: make(map[*client]bool),
 		tracer:  trace.Off(),
+		avatar:  avatar,
 	}
 }
