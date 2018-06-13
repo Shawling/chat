@@ -35,7 +35,9 @@
         </div>
         <form id="chatbox" role="form">
             <div class="form-group">
-                <img style="width: 30" src="{{.UserData.avatar_url}}"></img>
+                <a href="/upload">
+                    <img style="width: 30" src="{{.avatar}}"></img>
+                </a>
                 <label for="message">Send a message as {{.UserData.name}}
                 </label> or
                 <a href="/logout">Sign out</a>

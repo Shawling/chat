@@ -33,9 +33,17 @@ func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	data := map[string]interface{}{
 		"Host": r.Host,
 	}
+	//由于用户信息来源于浏览器，因此只能在请求时才能获取用户信息并渲染
 	if authCookie, err := r.Cookie("auth"); err == nil {
 		data["UserData"] = objx.MustFromBase64(authCookie.Value)
+
+		//获取用户头像
+		client := new(client)
+		client.userData = map[string]interface{}(data["UserData"].(objx.Map))
+		avatarURL, _ := UseTryAvatars.GetAvatarURL(client)
+		data["avatar"] = avatarURL
 	}
+
 	t.templ1.Execute(w, data)
 }
 
@@ -57,12 +65,18 @@ func main() {
 
 	http.Handle("/login", &templateHandler{filename: "login.html"})
 
+	http.Handle("/upload", MustAuth(&templateHandler{filename: "upload.html"}))
+
+	http.Handle("/avatars/", http.StripPrefix("/avatars/", http.FileServer(http.Dir("./avatars"))))
+
 	http.HandleFunc("/auth/", loginHanlder)
 
 	http.HandleFunc("/logout", logoutHandler)
 
+	http.HandleFunc("/uploader", uploaderHandler)
+
 	//creat new room bingding on a websocket address
-	r := newRoom(UseGravatar)
+	r := newRoom(UseTryAvatars)
 	r.tracer = trace.New(os.Stdout)
 	http.Handle("/room", r)
 	go r.run()

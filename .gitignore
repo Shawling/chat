@@ -17,3 +17,6 @@ debug
 # Mac OS
 .DS_Store
 */.DS_Store
+
+# uploaded avatars
+avatars/

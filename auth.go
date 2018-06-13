@@ -1,14 +1,15 @@
 package main
 
 import (
+	"crypto/md5"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"strings"
 
-	"github.com/stretchr/objx"
-
 	"github.com/stretchr/gomniauth"
+	"github.com/stretchr/objx"
 )
 
 //用于在 hanlder 执行前检测 authcookie，类似于装饰器
@@ -80,7 +81,11 @@ func loginHanlder(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		//将用户名存储在一个 msi(map[string]interface()) 对象中，可以看做一个 JSON object。同时进行 base64 编码，方便传入 URL 或者存放在 cookie 中
+		m := md5.New()
+		io.WriteString(m, strings.ToLower(user.Email()))
+		userID := fmt.Sprintf("%x", m.Sum(nil))
 		authCookieValue := objx.New(map[string]interface{}{
+			"userid":     userID,
 			"name":       user.Name(),
 			"avatar_url": user.AvatarURL(),
 			"email":      user.Email(),
